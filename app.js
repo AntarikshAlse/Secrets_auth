@@ -1,5 +1,5 @@
 //jshint esversion:6
-require('dotenv').config(); // Level 3 : environment variables
+require('dotenv').config();  
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
@@ -8,12 +8,9 @@ app.use(express.static("public"));
 app.set('view engine', 'ejs');
 const mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost:27017/usersDB');
-const encrypt = require('mongoose-encryption');
+const md5 = require('md5');
 
-/* Level 2 : Encryption */
 const userSchema = new mongoose.Schema({email: String, password:String}); 
-userSchema.plugin(encrypt,{secret:process.env.SECRET,encryptedFields:['password']});
-/*  */
 const User = mongoose.model('User', userSchema);
 app.get('/',(req, res)=>{
 res.render('home')
@@ -23,14 +20,16 @@ app.route('/login')
     res.render('login');
 })
 .post((req,res)=>{
-    User.findOne({email:req.body.username},(err,foundUser)=>{
+    const username = req.body.username;
+    const password = md5(req.body.password);
+    User.findOne({email:username},(err,foundUser)=>{
         if(err){
             console.log(err);
             return
         }
         else{
-            if(foundUser){
-                if(foundUser.password === req.body.password){
+            if(foundUser){ 
+                if(foundUser.password === password){
                     res.render('secrets');
                 }else{
                     console.log("Enter Correct Password");
@@ -52,7 +51,7 @@ app.route('/register')
 .post((req, res)=>{
     const newUser = new User({
         email:req.body.username,
-        password:req.body.password
+        password:md5(req.body.password)
     })
     newUser.save((err,response)=>{
         if(err){
