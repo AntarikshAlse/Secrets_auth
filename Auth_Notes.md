@@ -15,5 +15,7 @@ userSchema.plugin(encrypt,{secret:process.env.SECRET,encryptedFields:['password'
 
 >Level 3 - Hashing
 Match the Hashed password in DB
+<!-- Cant reverse in plain text = No Encrypt keys -->
 
 Level 4 - Salting and Hashing
+<!-- Using bcrypt for hashing with salt Rounds -->
